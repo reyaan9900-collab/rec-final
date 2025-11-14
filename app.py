@@ -33,7 +33,8 @@ def set_bg_local(image_file):
 
 # Call the function with your local image path
 
-set_bg_local(r"C:\Users\dell\Downloads\mm.jpeg")
+set_bg_local("mm.jpeg")
+
  # <-- Replace with your local path
 
 # --- Custom CSS for cards, fonts, hover effects ---
