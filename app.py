@@ -64,7 +64,7 @@ def download_if_not_exists(file_id, output):
     else:
         st.write(f"{output} already exists")
 
-# File ID for similarity.pkl from Google Drive
+# Google Drive file ID for similarity.pkl
 similarity_file_id = "1kj6WEIvPjBrXbwyp9P-j8fZ3Q3KuIWqv"
 download_if_not_exists(similarity_file_id, "similarity.pkl")
 
