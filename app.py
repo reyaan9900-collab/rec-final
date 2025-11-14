@@ -55,24 +55,26 @@ input[type="text"] {
 # --- Header ---
 st.markdown('<div class="header">🎬 Netflix Movie Recommendation System</div>', unsafe_allow_html=True)
 
-# --- Download similarity.pkl from Google Drive if not exists ---
-def download_if_not_exists(file_id, output):
-    if not os.path.exists(output):
+# --- Download similarity.pkl once and cache it locally ---
+def download_similarity(file_id, filename="similarity.pkl"):
+    # Use Streamlit's persistent app folder
+    cache_dir = st.secrets.get("APP_CACHE_DIR", "/home/appuser/")
+    path = os.path.join(cache_dir, filename)
+    
+    if not os.path.exists(path):
         url = f"https://drive.google.com/uc?id={file_id}"
-        gdown.download(url, output, quiet=False)
-        st.write(f"Downloaded {output} from Google Drive")
-    else:
-        st.write(f"{output} already exists")
+        gdown.download(url, path, quiet=False)
+        st.success(f"Downloaded {filename} to cache folder")
+    return path
 
-# Google Drive file ID for similarity.pkl
 similarity_file_id = "1kj6WEIvPjBrXbwyp9P-j8fZ3Q3KuIWqv"
-download_if_not_exists(similarity_file_id, "similarity.pkl")
+similarity_path = download_similarity(similarity_file_id)
 
 # --- Load Data ---
 @st.cache_data
 def load_data():
-    movies = pickle.load(open('movie_list.pkl', 'rb'))  # Movie titles (must be in repo)
-    similarity = pickle.load(open('similarity.pkl', 'rb'))  # Downloaded from Drive
+    movies = pickle.load(open('movie_list.pkl', 'rb'))  # must be in repo
+    similarity = pickle.load(open(similarity_path, 'rb'))  # from cached download
     return movies, similarity
 
 movies, similarity = load_data()
@@ -94,26 +96,17 @@ def get_recommendations(title, movies, similarity):
 st.sidebar.header("Search Your Movie")
 search_input = st.sidebar.text_input("Type to search:", "")
 movie_list = movies['Title'].sort_values().tolist()
-
-# Filter movie list live
-if search_input:
-    filtered_list = [m for m in movie_list if search_input.lower() in m.lower()]
-else:
-    filtered_list = movie_list
-
+filtered_list = [m for m in movie_list if search_input.lower() in m.lower()] if search_input else movie_list
 selected_movie = st.sidebar.selectbox("Select a movie:", filtered_list)
 
 # --- Recommendations ---
 if st.sidebar.button("Recommend 🎥"):
     with st.spinner("Finding similar movies..."):
         recommendations = get_recommendations(selected_movie, movies, similarity)
-        
         if recommendations[0] == "Movie not found":
             st.error("Movie not found in database.")
         else:
             st.subheader(f"Top 10 movies to watch after **{selected_movie}**:")
-            
-            # Display recommendations in responsive cards (2 rows x 5 cols)
             cols = st.columns(5)
             for i, movie in enumerate(recommendations):
                 with cols[i % 5]:
