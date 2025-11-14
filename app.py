@@ -1,6 +1,8 @@
 import streamlit as st
 import pickle
 import pandas as pd
+import os
+import gdown
 
 # --- Page Setup ---
 st.set_page_config(
@@ -53,11 +55,24 @@ input[type="text"] {
 # --- Header ---
 st.markdown('<div class="header">🎬 Netflix Movie Recommendation System</div>', unsafe_allow_html=True)
 
+# --- Download similarity.pkl from Google Drive if not exists ---
+def download_if_not_exists(file_id, output):
+    if not os.path.exists(output):
+        url = f"https://drive.google.com/uc?id={file_id}"
+        gdown.download(url, output, quiet=False)
+        st.write(f"Downloaded {output} from Google Drive")
+    else:
+        st.write(f"{output} already exists")
+
+# File ID for similarity.pkl from Google Drive
+similarity_file_id = "1kj6WEIvPjBrXbwyp9P-j8fZ3Q3KuIWqv"
+download_if_not_exists(similarity_file_id, "similarity.pkl")
+
 # --- Load Data ---
 @st.cache_data
 def load_data():
-    movies = pickle.load(open('movie_list.pkl', 'rb'))  # Movie titles
-    similarity = pickle.load(open('similarity.pkl', 'rb'))  # Cosine similarity
+    movies = pickle.load(open('movie_list.pkl', 'rb'))  # Movie titles (must be in repo)
+    similarity = pickle.load(open('similarity.pkl', 'rb'))  # Downloaded from Drive
     return movies, similarity
 
 movies, similarity = load_data()
