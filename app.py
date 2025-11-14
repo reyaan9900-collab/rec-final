@@ -1,7 +1,6 @@
 import streamlit as st
 import pickle
 import pandas as pd
-import base64
 
 # --- Page Setup ---
 st.set_page_config(
@@ -9,33 +8,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-# --- Function to set local background image ---
-def set_bg_local(image_file):
-    with open(image_file, "rb") as f:
-        data = f.read()
-    encoded = base64.b64encode(data).decode()
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url("data:image/png;base64,{encoded}");
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-            color: white;
-            font-family: 'Helvetica', sans-serif;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-# Call the function with your local image path
-
-set_bg_local("mm.jpeg")
-
- # <-- Replace with your local path
 
 # --- Custom CSS for cards, fonts, hover effects ---
 st.markdown("""
@@ -84,8 +56,8 @@ st.markdown('<div class="header">🎬 Netflix Movie Recommendation System</div>'
 # --- Load Data ---
 @st.cache_data
 def load_data():
-    movies = pickle.load(open('movie_list.pkl', 'rb'))  # No poster URLs
-    similarity = pickle.load(open('similarity.pkl', 'rb'))
+    movies = pickle.load(open('movie_list.pkl', 'rb'))  # Movie titles
+    similarity = pickle.load(open('similarity.pkl', 'rb'))  # Cosine similarity
     return movies, similarity
 
 movies, similarity = load_data()
